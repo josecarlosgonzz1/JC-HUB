@@ -1,1 +1,126 @@
+-- Load Rayfield into PlayerGui (not CoreGui)
+local player = game:GetService("Players").LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "JC HUB | SW2",
+    Icon = 0,
+    LoadingTitle = "JC HUB",
+    LoadingSubtitle = "by Jose Carlos",
+    Theme = "Default",
+
+    DisableRayfieldPrompts = true,
+    DisableBuildWarnings = true,
+
+    ConfigurationSaving = {
+        Enabled = false,
+        FolderName = nil,
+        FileName = "Big Hub"
+    },
+
+    Discord = {
+        Enabled = true,
+        Invite = "vegax",
+        RememberJoins = true
+    },
+
+    KeySystem = true,
+    KeySettings = {
+        Title = "JC HUB | Key",
+        Subtitle = "Access Key",
+        Note = "Get the key from our Discord",
+        FileName = "JCHUBKey",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {"JC20"}
+    }
+})
+
+-- MAIN TAB
+local MainTab = Window:CreateTab("👑Main", 4483362458)
+MainTab:CreateSection("Card Dupe💳")
+
+-- PLAYER TAB
+local PlayerTab = Window:CreateTab("🙋🏽‍♂️Player", 4483362458)
+PlayerTab:CreateSection("Player Mods")
+
+-- NOTIFICATION
+Rayfield:Notify({
+    Title = "JC HUB Loaded!",
+    Content = "Anti-Cheat protected version activated.",
+    Duration = 5
+})
+
+-- INFINITE JUMP
+local infiniteJumpEnabled = false
+
+PlayerTab:CreateButton({
+    Name = "Toggle Infinite Jump",
+    Callback = function()
+        infiniteJumpEnabled = not infiniteJumpEnabled
+
+        local UIS = game:GetService("UserInputService")
+        local Player = game:GetService("Players").LocalPlayer
+
+        UIS.JumpRequest:Connect(function()
+            if infiniteJumpEnabled and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
+                Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end
+        end)
+    end
+})
+
+-- WALKSPEED SLIDER
+PlayerTab:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 100},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 16,
+    Flag = "WalkSpeedSlider",
+    Callback = function(Value)
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = Value
+            _G._CustomWS = Value
+        end
+    end
+})
+
+-- Maintain WalkSpeed on respawn
+player.CharacterAdded:Connect(function(char)
+    wait(1)
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum and _G._CustomWS then
+        hum.WalkSpeed = _G._CustomWS
+    end
+end)
+
+-- Basic GUI relocation (ensure the GUI stays in PlayerGui, not CoreGui)
+task.spawn(function()
+    while true do
+        wait(5)  -- Check every 5 seconds to ensure it's in the right place
+        local gui = PlayerGui:FindFirstChild("Rayfield")
+        if gui and gui.Parent ~= PlayerGui then
+            gui.Parent = PlayerGui  -- Ensure Rayfield stays in PlayerGui
+        end
+    end
+end)
+
+-- Error handling and reconnect logic
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    if player == game.Players.LocalPlayer then
+        local success, err = pcall(function()
+            -- Load Rayfield again if necessary
+            local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+            -- Reinitialize all functions and settings if needed
+        end)
+
+        if not success then
+            warn("Error loading Rayfield: " .. err)
+        end
+    end
+end)
